@@ -1,0 +1,150 @@
+<h1 class="top-title">{{title}}</h1>
+<div class="wrapper">
+  <div class="divider div-transparent div-dot"></div>
+</div>
+<div class="container">
+  <div class="sample-wrapper list">
+    <igx-tree class="tree-root">
+      <igx-tree-node>
+        <h4>Judet</h4>
+        <igx-tree-node *ngFor="let locatie of locati | judet">
+          <button [class.selected]="locatie === selectedLocatie" type="button" (click)="onSelect(locatie)">
+            <span class="badge">{{locatie.id}}</span>
+            <span class="name">{{locatie.denumire}}</span>
+          </button>
+
+        </igx-tree-node>
+      </igx-tree-node>
+      <igx-tree-node>
+        <h4>Localitate</h4>
+        <igx-tree-node *ngFor="let locatie of locati | localitati">
+          <button [class.selected]="locatie === selectedLocatie" type="button" (click)="onSelect(locatie)">
+            <span class="badge">{{locatie.id}}</span>
+            <span class="name">{{locatie.denumire}}</span>
+          </button>
+        </igx-tree-node>
+      </igx-tree-node>
+      <igx-tree-node>
+        <h4>Cafenele</h4>
+        <igx-tree-node *ngFor="let locatie of locati | cafenele">
+          <button [class.selected]="locatie === selectedLocatie" type="button" (click)="onSelect(locatie)">
+            <span class="badge">{{locatie.id}}</span>
+            <span class="name">{{locatie.denumire}}</span>
+          </button>
+
+
+        </igx-tree-node>
+      </igx-tree-node>
+    </igx-tree>
+  </div>
+
+  <div *ngIf="selectedLocatie" class="details">
+    <h2>{{selectedLocatie.denumire | uppercase}} Details</h2>
+    <div class="id-name">Id: {{selectedLocatie.id }}</div>
+    <div></div>
+    <div>
+      <label for="denumire-name">Denumire: </label>
+      <input id="denumire-name" [(ngModel)]="selectedLocatie.denumire" placeholder="name">
+    </div>
+
+    <br />
+
+    <div class="form-group">
+      <input type="text" class="form-control search-field" placeholder="Search" [(ngModel)]="searchText" />
+    </div>
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th scope="col">Id</th>
+          <th scope="col">Denumire</th>
+          <th scope="col">Descriere</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="active-row" *ngFor="let coffee of getCoffees(selectedLocatie.id) | searchFilter: searchText">
+          <td>{{coffee.id}}</td>
+          <td>{{coffee.denumire}}</td>
+          <td>{{coffee.descriere}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="wrapper">
+  <div class="divider div-transparent div-dot"></div>
+</div>
+
+
+<div class="cerinte">
+<p>Aici ar trebui să văd un ecran split-screen, ca în Windows Explorer. În stânga voi avea un Tree. Acest tree conțin județe, localități și cafenele.</p>
+<p>Atunc când selectez o cafenea în dreapta ecranului ar trebui să văd lista cu cafelele pe care le comercializează respectiva cafenea.</p>
+<p>
+  Tot in ecranul din dreapta vrem sa vedem un camp pentru cautare-si-filtrare.
+  In acest unic camp ar trebui sa pot scrie identificatorul cafelei si/sau un text oarecare; Textul va fi cautat in campurile descriere si denumire, cu urmatoarele reguli:
+</p>
+
+<ul>
+  <li>Cautarea incepe imediat ce am incetat sa tastez, dupa un delay de 250 milisecunde. Daca tastez repede "1234" actiunea de cautare si filtrare va fi efectuata o singura data, la 250 milisecunde dupa ce am tastat "4". Timpul de 250 milisecunde este ales intentionat lung, astfel intarzierea se fie usor perceptibila.</li>
+  <li>Din punct de vedere logic si pentru filtrare textul din caseta de cautare si filtrare va fi spart in cuvinte; Separatorul va fi spatiu; Nu este necesar sa avem o reprezentare vizuala (in UI) al listei de cuvinte dupa care urmeaza sa se faca filtrarea; Pentru depanare un console.log nu strica.</li>
+  <li>Fiecare cuvant reprezinta un criteriu de filtrare distinct. Relatia intre criteriile de filtrare este AND (toate criteriile de filtrare trebuie sa fie satisfacute astfel pentru ca o cafea sa corespunda filtrului)</li>
+  <li>Daca cuvantul este format exclusiv din cifre atunci presupunem ca este ID-ul cafelei. La verificarea ID-ului folosim egalitate stricta, adica atunci cand caut "1" cafeaua cu id-ul "1" corespunde, dar cafeaua cu id-ul "10" nu corespunde.</li>
+  <li>In orice alta situatie cuvantul trebuie sa se gaseasca in denumire SAU in descriere; Cautarea trebuie sa fie case-insensitive.</li>
+
+</ul>
+
+<h3>Exemplu de cautare</h3>
+
+<table class="styled-table">
+
+  <tr>
+    <th>
+      ID Cafea
+    </th>
+    <th>
+      Denumire
+    </th>
+    <th>
+      Descriere
+    </th>
+    <th>
+      Filtru: "25"
+    </th>
+    <th>
+      Filtru: "af"
+    </th>
+    <th>
+      Filtru: "grame cafea"
+    </th>
+  </tr>
+
+  <tr>
+    <td>101</td>
+    <td>Cafea Jacobs</td>
+    <td>Punga verde, 250 grame</td>
+    <td>Nu corespunde: 25 se regaseste in textul 250, dar fiind exclusiv numeric cautarea se face doar in id, folosind egalitate.</td>
+    <td>Corespunde: Cafea contine af</td>
+    <td>Corespunde: Descrierea contine "grame" si denumirea contine "cafea"</td>
+  </tr>
+
+  <tr class="active-row">
+    <td>25</td>
+    <td>Ceai Plafar</td>
+    <td>Cutie cu 20 plicuri</td>
+    <td>Corespunde: id-ul cafelei este 25</td>
+    <td>Corespunde: Plafar contine af</td>
+    <td>Nu corespunde</td>
+  </tr>
+
+  <tr>
+    <td>250</td>
+    <td>Capsule Nespresso 8 grame</td>
+    <td>Capsule metalice cu o cantitate pre-dozata de cafea</td>
+    <td>Nu corespunde: Id-ul cafelei este 250, adica incepe cu 25, dar cautarea dupa id se face strict prin egalitate</td>
+    <td>Corespunde: cafea din descriere contine af</td>
+    <td>Corespunde: denumirea contine "grame" si descrierea "cafea"</td>
+  </tr>
+
+</table>
+</div>
+<router-outlet></router-outlet>
